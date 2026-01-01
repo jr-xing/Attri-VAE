@@ -1,0 +1,48 @@
+# VQ-VAE Pre-training Configuration for 2D Cardiac MRI
+#
+# VQ-VAE uses discrete latent codes instead of continuous Gaussian latents.
+# This typically produces sharper reconstructions because:
+# - No averaging over continuous distributions
+# - Each spatial location maps to ONE discrete code
+# - Forces the model to commit to specific reconstructions
+#
+# Usage:
+#   python pretrain_vqvae_2d.py --config configs/pretrain_vqvae.yaml
+
+# Data configuration
+data:
+  data_file: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/data/2025-06-01-onc-cohort-144-with-serial-scans-and-103-LGE-masks.npy"
+  spreadsheet: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/link_project_data/CHIP ICI MI CM outcomes - Updated 2025-10-09.xlsx"
+  val_fraction: 0.2
+  seed: 42
+
+# Model architecture - VQ-VAE
+model:
+  image_channels: 1           # Grayscale cardiac MRI
+  embedding_dim: 64           # Dimension of each codebook vector
+  num_embeddings: 512         # Number of codes in codebook
+  hidden_dims: [128, 256]     # Encoder/decoder channel progression
+  beta: 0.25                  # Commitment loss weight
+  img_size: 80                # Input image size
+
+# Training parameters
+training:
+  batch_size: 16
+  epochs: 1000                # Increased from 500
+  learning_rate: 0.001
+  weight_decay: 0.0001        # L2 regularization
+  num_workers: 4
+  augment: true               # Random flips and rotations
+
+  # Early stopping - disabled to allow longer training
+  early_stopping: false
+  patience: 50
+  min_delta: 0.0001
+
+# Loss weights
+loss:
+  ssim_weight: 1.5            # Increased from 0.5 for sharper edges
+  # Note: VQ loss is computed internally by the VQ layer
+
+# Output directory
+output_dir: "/gpfs/gibbs/project/kwan/jx332/code/2025-12-Attri-VAE/studies/SD_attrivae_age_ici_v4_2D_vqvae/outputs/pretrain_vqvae"

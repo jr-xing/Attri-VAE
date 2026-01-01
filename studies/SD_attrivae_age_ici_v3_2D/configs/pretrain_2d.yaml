@@ -1,0 +1,46 @@
+# Stage 1: Pre-train 2D VAE for Reconstruction
+#
+# This configuration is for training a 2D VAE on individual cardiac MRI slices.
+# Key differences from 3D version:
+# - Input: 80x80 slices instead of 80x80x80 volumes
+# - Each patient contributes 3 slices (3x more training samples)
+# - Fewer model parameters (2D convolutions)
+# - Better reconstruction expected due to less compression
+#
+# Usage:
+#   python pretrain_vae_2d.py --config configs/pretrain_2d.yaml
+
+# Data configuration
+data:
+  data_file: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/data/2025-06-01-onc-cohort-144-with-serial-scans-and-103-LGE-masks.npy"
+  spreadsheet: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/link_project_data/CHIP ICI MI CM outcomes - Updated 2025-10-09.xlsx"
+  val_fraction: 0.2
+  seed: 42
+
+# Model architecture - 2D version
+model:
+  image_channels: 1
+  h_dim: 64
+  latent_size: 16                      # Same as v3 3D
+  n_filters_enc: [8, 16, 32, 64, 2]    # Encoder filters
+  n_filters_dec: [64, 32, 16, 8, 4, 2] # Decoder filters
+  target_size: [80, 80]                # 2D! (not 80x80x80)
+
+# Training parameters
+training:
+  batch_size: 16                       # Can use larger batch with 2D (less memory)
+  epochs: 300                          # Should converge faster with more samples
+  learning_rate: 0.001
+  num_workers: 4
+  augment: true                        # Random flips and rotations
+
+# Loss weights
+loss:
+  recon_param: 1.0                     # MSE reconstruction loss weight
+  ssim_weight: 0.5                     # SSIM loss for sharper edges
+  beta: 0.0001                         # KL weight (low to prevent posterior collapse)
+  beta_warmup_epochs: 50               # Linear warmup from 0 to beta
+  free_bits: 0.25                      # Minimum KL per dimension
+
+# Output directory
+output_dir: "/gpfs/gibbs/project/kwan/jx332/code/2025-12-Attri-VAE/studies/SD_attrivae_age_ici_v3_2D/outputs/pretrain_2d"

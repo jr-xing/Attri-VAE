@@ -1,0 +1,38 @@
+# Stage 1: Pre-train VAE for Reconstruction
+#
+# This config trains a VAE to learn good image reconstructions.
+# Loss = recon_loss + beta * kl_loss
+# No MLP classification, no attribute regularization.
+
+# Data configuration
+data:
+  data_file: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/data/2025-06-01-onc-cohort-144-with-serial-scans-and-103-LGE-masks.npy"
+  spreadsheet: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/link_project_data/CHIP ICI MI CM outcomes - Updated 2025-10-09.xlsx"
+  val_fraction: 0.2
+  seed: 42
+
+# Model architecture
+model:
+  image_channels: 1
+  h_dim: 96
+  latent_size: 64
+  n_filters_enc: [8, 16, 32, 64, 2]
+  n_filters_dec: [64, 32, 16, 8, 4, 2]
+  target_size: [80, 80, 80]
+
+# Training parameters
+training:
+  batch_size: 8
+  epochs: 300
+  learning_rate: 0.001
+  num_workers: 4
+  augment: true
+
+# Loss weights
+loss:
+  recon_param: 1.0        # Reconstruction loss weight (using mean reduction)
+  beta: 0.01              # KL divergence weight (small for beta-VAE)
+  beta_warmup_epochs: 50  # Warmup beta from 0 to beta over these epochs
+
+# Output
+output_dir: "/gpfs/gibbs/project/kwan/jx332/code/2025-12-Attri-VAE/studies/SD_attrivae_age_ici_v2/outputs/pretrain"

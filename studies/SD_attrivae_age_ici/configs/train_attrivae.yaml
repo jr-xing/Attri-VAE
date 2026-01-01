@@ -1,0 +1,45 @@
+# AttriVAE Training Configuration for Age/ICI Study
+#
+# This config trains an AttriVAE model to learn disentangled representations:
+# - Latent dim 0: Age (continuous)
+# - Latent dim 1: ICI treatment (binary)
+# - Classification target: CHIP status
+
+# Data configuration
+data:
+  data_file: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/data/2025-06-01-onc-cohort-144-with-serial-scans-and-103-LGE-masks.npy"
+  spreadsheet: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/link_project_data/CHIP ICI MI CM outcomes - Updated 2025-10-09.xlsx"
+  val_fraction: 0.2
+  seed: 42
+
+# Model architecture
+model:
+  image_channels: 1
+  h_dim: 96
+  latent_size: 64
+  n_filters_enc: [8, 16, 32, 64, 2]
+  n_filters_dec: [64, 32, 16, 8, 4, 2]
+  target_size: [80, 80, 80]
+
+# Training parameters
+training:
+  batch_size: 8
+  epochs: 500
+  learning_rate: 0.0001
+  num_workers: 4
+  augment: true
+
+# Loss weights
+loss:
+  recon_param: 1.0    # Reconstruction loss weight
+  beta: 2.0           # KL divergence weight (beta-VAE)
+  alpha: 1.0          # Classification (MLP) loss weight
+  gamma: 10.0         # Attribute regularization loss weight
+  factor: 100.0       # tanh scaling factor in AR loss
+
+# Training flags
+use_AR_LOSS: true     # Enable attribute regularization
+is_L1: false          # Disable L1 weight regularization
+
+# Output
+output_dir: "/gpfs/gibbs/project/kwan/jx332/code/2025-12-Attri-VAE/studies/SD_attrivae_age_ici/outputs/training"

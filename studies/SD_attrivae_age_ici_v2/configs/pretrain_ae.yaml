@@ -1,0 +1,41 @@
+# Deterministic Autoencoder Pre-training
+#
+# This config trains a deterministic AE (no KL, no sampling) to test
+# whether the encoder/decoder architecture can produce sharp reconstructions.
+#
+# Loss = MSE reconstruction only (no KL divergence)
+#
+# Diagnosis:
+#   - If AE produces sharp reconstructions: VAE-specific issue (KL weighting)
+#   - If AE produces blurry reconstructions: Architecture or data issue
+
+# Data configuration
+data:
+  data_file: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/data/2025-06-01-onc-cohort-144-with-serial-scans-and-103-LGE-masks.npy"
+  spreadsheet: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/link_project_data/CHIP ICI MI CM outcomes - Updated 2025-10-09.xlsx"
+  val_fraction: 0.2
+  seed: 42
+
+# Model architecture (same as VAE for fair comparison)
+model:
+  image_channels: 1
+  h_dim: 96
+  latent_size: 64
+  n_filters_enc: [8, 16, 32, 64, 2]
+  n_filters_dec: [64, 32, 16, 8, 4, 2]
+  target_size: [80, 80, 80]
+
+# Training parameters
+training:
+  batch_size: 8
+  epochs: 200
+  learning_rate: 0.001
+  num_workers: 4
+  augment: true
+
+# Loss weights (no KL for deterministic AE)
+loss:
+  recon_param: 1.0
+
+# Output
+output_dir: "/gpfs/gibbs/project/kwan/jx332/code/2025-12-Attri-VAE/studies/SD_attrivae_age_ici_v2/outputs/pretrain_ae"

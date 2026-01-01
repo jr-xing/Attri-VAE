@@ -100,7 +100,7 @@ class ConvVAE(nn.Module):
         self.bn5_dec = nn.BatchNorm3d(n_filters_DEC[3])
         self.conv2_dec = nn.Conv3d(in_channels = n_filters_DEC[3], out_channels = n_filters_DEC[4], kernel_size = [3,3,3], stride = 1, padding =1)
         self.bn6_dec = nn.BatchNorm3d(n_filters_DEC[4])
-        self.conv3_dec = nn.Conv3d(in_channels = n_filters_DEC[4], out_channels = IMG, kernel_size = [3,3,3], stride = 1, padding =1)
+        self.conv3_dec = nn.Conv3d(in_channels = n_filters_DEC[4], out_channels = image_channels, kernel_size = [3,3,3], stride = 1, padding =1)
         self.bn7_dec = nn.BatchNorm3d(image_channels)
         
 

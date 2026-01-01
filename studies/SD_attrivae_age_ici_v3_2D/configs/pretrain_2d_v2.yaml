@@ -1,0 +1,66 @@
+# Stage 1: Pre-train 2D VAE for Reconstruction - V2 (Improved)
+#
+# CHANGES from v1:
+# - Larger bottleneck: 4 channels at 5x5 = 100 values (was 2x5x5=50)
+# - Higher SSIM weight: 1.0 (was 0.5) for sharper edges
+# - Early stopping with patience to prevent overfitting
+# - Weight decay for regularization
+# - Fewer max epochs (training stops early anyway)
+# - Slightly higher beta to encourage latent space usage
+#
+# Problems in v1:
+# - Overfitting (40% gap between train/val MSE)
+# - Blurry "average" reconstructions
+# - Model predicts mean shape regardless of input variations
+#
+# Solutions applied:
+# 1. Larger bottleneck capacity (50 -> 100 values)
+# 2. Higher SSIM weight for structural preservation
+# 3. Early stopping to prevent overfitting
+# 4. Weight decay for regularization
+# 5. Slightly higher KL weight to use latent space better
+#
+# Usage:
+#   python pretrain_vae_2d.py --config configs/pretrain_2d_v2.yaml
+
+# Data configuration
+data:
+  data_file: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/data/2025-06-01-onc-cohort-144-with-serial-scans-and-103-LGE-masks.npy"
+  spreadsheet: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/link_project_data/CHIP ICI MI CM outcomes - Updated 2025-10-09.xlsx"
+  val_fraction: 0.2
+  seed: 42
+
+# Model architecture - LARGER BOTTLENECK
+model:
+  image_channels: 1
+  h_dim: 64
+  latent_size: 16
+  n_filters_enc: [8, 16, 32, 64, 4]    # Last is 4 (was 2) -> 4x5x5=100 bottleneck
+  n_filters_dec: [64, 32, 16, 8, 4, 2]
+  target_size: [80, 80]
+  bottleneck_channels: 4               # Explicit setting for clarity
+
+# Training parameters
+training:
+  batch_size: 16
+  epochs: 500                          # Max epochs (early stopping will likely trigger first)
+  learning_rate: 0.001
+  weight_decay: 0.0001                 # L2 regularization to prevent overfitting
+  num_workers: 4
+  augment: true
+
+  # Early stopping
+  early_stopping: true
+  patience: 50                         # Stop if no improvement for 50 epochs
+  min_delta: 0.0001                    # Minimum improvement to count as progress
+
+# Loss weights
+loss:
+  recon_param: 1.0
+  ssim_weight: 1.0                     # Increased from 0.5 for sharper edges
+  beta: 0.0005                         # Slightly higher than v1 (0.0001) to use latent space
+  beta_warmup_epochs: 30               # Shorter warmup
+  free_bits: 0.1                       # Lower free_bits to allow more KL penalty
+
+# Output directory
+output_dir: "/gpfs/gibbs/project/kwan/jx332/code/2025-12-Attri-VAE/studies/SD_attrivae_age_ici_v3_2D/outputs/pretrain_2d_v2"

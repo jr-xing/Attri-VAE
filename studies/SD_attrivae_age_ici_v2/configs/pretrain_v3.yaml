@@ -1,0 +1,51 @@
+# Stage 1: Pre-train VAE for Reconstruction - V3 (Sharper Reconstructions)
+#
+# CHANGES from v2:
+# - Reduced latent_size: 16 instead of 64 (better for small dataset of ~94 samples)
+# - Added SSIM loss component for sharper edges
+# - Smaller network to match reduced latent dimension
+#
+# The problem in v2 was BLURRY RECONSTRUCTIONS:
+# - MSE loss alone produces blurry outputs (predicts "average" when uncertain)
+# - 64 latent dimensions is too many for ~94 training samples
+# - Network may be overly complex for the dataset size
+#
+# Solutions applied:
+# 1. Reduced latent dimension (64 -> 16): forces more compact representation
+# 2. Added SSIM loss: encourages structural similarity and sharper edges
+# 3. Slightly smaller encoder filters to reduce overfitting
+
+# Data configuration
+data:
+  data_file: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/data/2025-06-01-onc-cohort-144-with-serial-scans-and-103-LGE-masks.npy"
+  spreadsheet: "/gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/link_project_data/CHIP ICI MI CM outcomes - Updated 2025-10-09.xlsx"
+  val_fraction: 0.2
+  seed: 42
+
+# Model architecture - REDUCED for small dataset
+model:
+  image_channels: 1
+  h_dim: 64                     # Reduced from 96
+  latent_size: 16               # Reduced from 64 (key change!)
+  n_filters_enc: [8, 16, 32, 64, 2]
+  n_filters_dec: [64, 32, 16, 8, 4, 2]
+  target_size: [80, 80, 80]
+
+# Training parameters
+training:
+  batch_size: 8
+  epochs: 500                   # Reduced since smaller model converges faster
+  learning_rate: 0.001
+  num_workers: 4
+  augment: true
+
+# Loss weights
+loss:
+  recon_param: 1.0              # MSE reconstruction loss weight
+  ssim_weight: 0.5              # NEW: SSIM loss for sharper edges
+  beta: 0.0001                  # KL weight (same as v2)
+  beta_warmup_epochs: 50        # Warmup epochs
+  free_bits: 0.25               # Reduced since smaller latent space
+
+# Output
+output_dir: "/gpfs/gibbs/project/kwan/jx332/code/2025-12-Attri-VAE/studies/SD_attrivae_age_ici_v2/outputs/pretrain"

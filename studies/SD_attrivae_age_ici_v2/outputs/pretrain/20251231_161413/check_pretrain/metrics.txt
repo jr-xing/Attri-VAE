@@ -1,0 +1,8 @@
+Pre-trained VAE Reconstruction Metrics
+========================================
+Checkpoint: outputs/pretrain/20251231_161413/best_recon_model.pth
+N samples: 50
+
+MSE: 0.009460
+MAE: 0.074202
+RMSE: 0.097265

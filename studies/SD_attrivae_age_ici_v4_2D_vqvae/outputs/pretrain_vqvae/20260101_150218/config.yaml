@@ -1,0 +1,24 @@
+augment: true
+batch_size: 16
+beta: 0.25
+data_file: /gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/data/2025-06-01-onc-cohort-144-with-serial-scans-and-103-LGE-masks.npy
+early_stopping: true
+embedding_dim: 64
+epochs: 500
+hidden_dims:
+- 128
+- 256
+image_channels: 1
+img_size: 80
+learning_rate: 0.001
+min_delta: 0.0001
+num_embeddings: 128
+num_workers: 4
+output_dir: /gpfs/gibbs/project/kwan/jx332/code/2025-12-Attri-VAE/studies/SD_attrivae_age_ici_v4_2D_vqvae/outputs/pretrain_vqvae
+patience: 50
+seed: 42
+spreadsheet: /gpfs/gibbs/project/kwan/jx332/code/2025-09-LGE-CHIP-Classification-V2/link_project_data/CHIP
+  ICI MI CM outcomes - Updated 2025-10-09.xlsx
+ssim_weight: 0.5
+val_fraction: 0.2
+weight_decay: 0.0001
